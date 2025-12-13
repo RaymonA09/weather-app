@@ -15,25 +15,35 @@ function App() {
   });
 
   async function handleSearch(city) {
-    const geocoding = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${city}`
-    );
-    const geoData = await geocoding.json();
-
-    if (geoData.results || geoData.results.length === 0) {
-      const result = geoData.results[0];
-      setLocation({
-        latitude: result.latitude,
-        longitude: result.longitude,
-        city: result.name
-      });
-    } else {
-      alert('City not found');
-    }
+  if (city.latitude && city.longitude) {
+    setLocation({
+      latitude: city.latitude,
+      longitude: city.longitude,
+      city: city.name
+    });
+    return;
   }
 
+  // fallback if user typed manually
+  const geocoding = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${city}`
+  );
+  const geoData = await geocoding.json();
+
+  if (geoData.results && geoData.results.length > 0) {
+    const result = geoData.results[0];
+    setLocation({
+      latitude: result.latitude,
+      longitude: result.longitude,
+      city: result.name
+    });
+  } else {
+    alert('City not found');
+  }
+}
+
   return (
-    <div className="w-full min-h-screen bg-[#02012b] text-white">
+    <div className="w-full min-h-screen bg-linear-to-br from-[#1B1D29] via-[#23344D] to-[#41689B] text-white">
       <div className="max-w-[1440px]
       xl:w-[85%] lg:w-[80%] md:w-[95%]
       mx-auto 
@@ -48,13 +58,13 @@ function App() {
           {/* Left column components */} 
           <div className="flex flex-col gap-8">
             <CurrentWeatherCard location={location} />
-            <StatsGrid />
-            <DailyForecast />
+            <StatsGrid location={location} />
+            <DailyForecast location={location} />
           </div>
 
           {/* RIGHT COLUMN (1/3 width) */}
           <div className="h-full flex flex-col mt-8 xl:mt-0">
-            <HourlyForecast />
+            <HourlyForecast location={location} />
           </div>
 
         </div>

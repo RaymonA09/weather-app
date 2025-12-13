@@ -1,62 +1,131 @@
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@radix-ui/react-select';
-import { useState } from 'react'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useEffect, useState } from 'react'
 import { Card, CardContent } from './ui/card';
-import sunnyIcon from "../assets/images/icon-sunny.webp";
-import cloudyIcon from "../assets/images/icon-partly-cloudy.webp";
-import rainyIcon from "../assets/images/icon-rain.webp";
-import stormyIcon from "../assets/images/icon-storm.webp";
-import drizzelIcon from "../assets/images/icon-drizzle.webp";
-import fogIcon from "../assets/images/icon-fog.webp";
-import snowIcon from "../assets/images/icon-snow.webp";
-import dropDownIcon from "../assets/images/icon-dropdown.svg";
+import { getWeatherIcon } from '@/lib/weatherIcon';
+import { fetchWeatherData } from '@/api/weather';
+import { useUnits } from '@/context/UnitsContext';
+import { Skeleton } from './ui/skeleton';
 
-const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default function HourlyForecast() {
+export default function HourlyForecast({ location }) {
 
-    // const [selectedDay, setselectedDay] = useState(days[0]);
+    const [weatherData, setWeatherData] = useState(null);
+    const [selectedDay, setselectedDay] = useState(null);
 
-    const hourlyData = [
-        {time: "1 AM", icon: sunnyIcon, temp: 16},
-        {time: "2 AM", icon: cloudyIcon, temp: 15},
-        {time: "3 AM", icon: rainyIcon, temp: 15},
-        {time: "4 AM", icon: stormyIcon, temp: 14},
-        {time: "5 AM", icon: drizzelIcon, temp: 14},
-        {time: "6 AM", icon: fogIcon, temp: 13},
-        {time: "7 AM", icon: snowIcon, temp: 13},
-        {time: "8 AM", icon: fogIcon, temp: 14},
-    ];
+    const { units } = useUnits();
+    
+
+
+    useEffect(() => {
+        async function loadWeather() {
+            try {
+                const data = await fetchWeatherData(location);
+                setWeatherData(data);
+
+                if (data?.hourly?.time?.length >0 ) {
+                    const firstDate = new Date(data.hourly.time[0]);
+                    const firstDay = firstDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    setselectedDay(firstDay);
+                }
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+            }
+        }
+        loadWeather();
+    }, [location]);
+
+if (!weatherData) {
+  return (
+    <Card className="bg-white/10 border border-white/20 backdrop-blur-xl rounded-3xl py-4 text-white shadow-[0_10px_40px_rgba(0,0,0,0.35)]">
+      <CardContent>
+        {/* Header Skeleton */}
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/10">
+          <Skeleton className="h-5 w-40 bg-white/20" />
+          <Skeleton className="h-10 w-32 rounded-xl bg-white/20" />
+        </div>
+
+        {/* Hour Rows Skeleton */}
+        <div className="flex flex-col gap-3">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="flex justify-between items-center px-4 py-3 bg-white/5 border border-white/10 rounded-2xl"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-9 h-9 rounded-full bg-white/20" />
+                <Skeleton className="h-4 w-16 bg-white/20" />
+              </div>
+              <Skeleton className="h-5 w-10 bg-white/30" />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+    const hourly = weatherData.hourly;
+
+
+    const hoursByDay = {};
+
+    hourly.time.forEach((time, index) => {
+        const date = new Date(time);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+
+        if (!hoursByDay[dayName]) {
+            hoursByDay[dayName] = [];
+        }
+
+        const tempCelsius = Math.round(hourly.temperature_2m[index]);
+        const temp = units.temperature === "celsius" ? tempCelsius : Math.round((tempCelsius * 9/5) + 32);
+
+        hoursByDay[dayName].push({
+            time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            icon: getWeatherIcon(hourly.weather_code[index]),
+            temp: temp,
+        });
+    });
+
+    const availableDays = Object.keys(hoursByDay);
+    const hourlyData = hoursByDay[selectedDay].slice(0, 8); // Get first 8 hours of the selected day
 
   return (
-    <Card className="h-full bg-[#25253f] border-transparent rounded-3xl py-4">
+    <Card className="h-90% bg-white/10 border border-white/20 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.35)] rounded-3xl py-4 text-white">
         <CardContent>
             {/* Header */}
-            <div className="flex justify-between items-center mb-2 py-2">
-                <h2 className="text-lg font-medium text-white"> Hourly Forecast </h2>
-                <Select>
-                    <SelectTrigger className="w-[120px] h-10 bg-[#3c3b5d] text-white rounded-md flex items-center justify-center">
-                        <SelectValue placeholder={days[0]} /> <img src={dropDownIcon} alt="dropdown icon" className='ml-2' />
+            <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/10">
+                <h2 className="text-lg font-semibold tracking-wide text-white"> Hourly Forecast </h2>
+                    <Select onValueChange={(value) => setselectedDay(value)} value={selectedDay}>
+                    <SelectTrigger className="w-[130px] h-10 bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white [&>span]:text-white [&_svg]:stroke-white [&_svg]:opacity-100">
+                        <SelectValue placeholder={selectedDay || "Select a Day"} />
                     </SelectTrigger>
-                    <SelectContent className='w-[150px] p-2 bg-[#25253f] border border-[#3a3a56] text-white rounded-md 
-                    -translate-x-7 md:-translate-x-7 lg:-translate-x-7.5 xl:-translate-x-7'  
-                    position="popper" side="bottom" sideOffset={5}>
+                    <SelectContent className='w-[150px] bg-white/10 backdrop-blur-xl border border-white/20 text-white rounded-xl shadow-md
+                    -translate-x-7 md:-translate-x-7 lg:-translate-x-7.5 xl:-translate-x-3.5'  
+                    position="popper" side="bottom" sideOffset={8}>
 
-                        <SelectGroup sideOffset={8}>
-                            {days.map((day) => (
-                                <SelectItem key={day} value={day.toLowerCase()} className='p-2 hover:bg-[#2f2f49] rounded-md'> {day} </SelectItem>
+                        <SelectGroup>
+                            {availableDays.map((day) => (
+                                <SelectItem
+                                    key={day}
+                                    value={day}
+                                    className="rounded-lg px-3 py-2 hover:bg-white/5 focus:bg-white/10 cursor-pointer text-white" 
+                                    >
+                                    {day}
+                                </SelectItem>
                             ))}
-                        </SelectGroup>
+                         </SelectGroup>
                     </SelectContent>
                 </Select>
             </div>
 
-            <div className='h-full flex flex-col gap-3'>
+            <div className='max-h-[650px] overflow-y-auto flex flex-col gap-3'>
                 {hourlyData.map((hour, index) => (
-                    <div key={index} className='flex justify-between items-center p-2 bg-[#2f2f49] border border-[#3a3a56] rounded-md '>
-                        <div className='flex items-center gap-2'>
-                            <img src={hour.icon} alt="weather icon" className='w-10 h-10'/> <span className='text-l font-semibold text-white/80'> {hour.time} </span>
+                    <div key={index} className='flex justify-between items-center px-4 py-3 bg-white/5 border border-white/10 hover:bg-white/10 transition rounded-2xl '>
+                        <div className='flex items-center gap-3'>
+                            <img src={hour.icon} alt="weather icon" className='w-9 h-9'/> <span className='text-sm font-medium text-white/80'> {hour.time} </span>
                         </div>
-                        <span className='text-l font-light text-white/80'> {hour.temp}° </span>
+                        <span className='text-lg font-semibold text-white/80'> {hour.temp}° </span>
 
                     </div>
                 ))}

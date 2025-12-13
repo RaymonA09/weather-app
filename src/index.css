@@ -43,6 +43,21 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-primary-100: var(--primary-100);
+  --color-primary-300: var(--primary-300);
+  --color-primary-500: var(--primary-500);
+  --color-primary-700: var(--primary-700);
+
+  --color-gray-50: var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-300: var(--gray-300);
+  --color-gray-700: var(--gray-700);
+  --color-gray-900: var(--gray-900);
+
+  --radius-glass: var(--radius-glass);
+  --radius-glass-sm: var(--radius-glass-sm);
+  
 }
 
 :root {
@@ -78,6 +93,40 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+   /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.25);
+  --glass-blur: 20px;
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+  /* Weather palette */
+  --primary-100: #E0F4FF;
+  --primary-300: #7CC8FF;
+  --primary-500: #1B9CFC;
+  --primary-700: #005F9E;
+
+  /* Neutral palette */
+  --gray-50: #FFFFFF;
+  --gray-100: #F5F7FA;
+  --gray-300: #D9E0E6;
+  --gray-700: #2C2F35;
+  --gray-900: #1A1B1E;
+
+  /* Spacing Scale */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  /* Radiuses for the UI */
+  --radius-glass: 24px;
+  --radius-glass-sm: 18px;
+
+  /* Fonts */
+  --font-primary: "Lato", sans-serif;
+  --font-display: "Raleway", sans-serif;
 }
 
 .dark {
