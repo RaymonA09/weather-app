@@ -1,5 +1,3 @@
-// components/search/useSearchLogic.js
-
 import { useState, useEffect, useRef, useCallback } from "react";
 import { debounce } from "lodash";
 
