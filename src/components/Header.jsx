@@ -8,7 +8,9 @@ import { useUnits } from '@/context/UnitsContext';
 
 export default function Header() {
 
-    const {units, updateUnit} = useUnits();
+    const {units, updateUnit, setMetric, setImperial} = useUnits();
+
+    const isMetric = units.temperature === "celsius";
 
   return (
     <header className="w-full flex justify-between items-center">
@@ -23,7 +25,9 @@ export default function Header() {
             </DropdownMenuTrigger>
     
             <DropdownMenuContent className='bg-white/10 backdrop-blur-xl border border-white/20 w-50 p-3 rounded-xl shadow-md  -translate-x-3.5 md:-translate-x-8.5 lg:-translate-x-11.5 z-50' sideOffset={8}>
-                <DropdownMenuItem className='mb-2 py-1 pl-1 hover:bg-white/20 rounded-md'> Switch to Imperial </DropdownMenuItem>
+                <DropdownMenuItem className='mb-2 py-1 pl-1 hover:bg-white/20 rounded-md' onClick={() => {
+                    isMetric ? setImperial() : setMetric();
+                }}> {isMetric ? "Switch to Imperial" : "Switch to Metric"} </DropdownMenuItem>
 
                 <DropdownMenuGroup>
                     <DropdownMenuLabel className="text-xs text-gray-400 mb-1 pl-1"> Temperature Units </DropdownMenuLabel>

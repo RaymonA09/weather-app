@@ -9,13 +9,33 @@ export function UnitsProvider({ children }) {
     precipitation: "mm",    // "mm" | "in"
   });
 
-  // update a single unit category
-  const updateUnit = (category, value) => {
-    setUnits(prev => ({ ...prev, [category]: value }));
+    function updateUnit(type, value) {
+    setUnits(prev => ({
+      ...prev,
+      [type]: value,
+    }));
+  };
+
+  function setMetric(){
+    setUnits({
+      system: "metric",
+      temperature: "celsius",
+      wind: "kmh",
+      precipitation: "mm",
+    });
+  };
+
+  function setImperial(){
+    setUnits({
+      system: "imperial",
+      temperature: "fahrenheit",
+      wind: "mph",
+      precipitation: "in",
+    })
   };
 
   return (
-    <UnitsContext.Provider value={{ units, updateUnit }}>
+    <UnitsContext.Provider value={{ units, updateUnit, setMetric, setImperial }}>
       {children}
     </UnitsContext.Provider>
   );
